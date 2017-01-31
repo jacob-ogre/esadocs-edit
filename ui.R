@@ -40,10 +40,12 @@ body <- dashboardBody(fluidPage(
           column(6,
             hidden(
               p(class = "warnbadge", id = "nohit", "No Hits")
-            )
+            ),
+            shinyBS::bsAlert("success_note")
           )
         ),
         fluidRow(hr(class="style-four")),
+        # fluidRow(),
         fluidRow(
           br(),
           column(4,

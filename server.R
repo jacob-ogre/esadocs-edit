@@ -139,7 +139,6 @@ shinyServer(function(input, output, session) {
     if(inpt == "" & is.null(got_dat()[[var]])) {
       return("")
     }
-    observe(print(c("in_getval", inpt, var)))
   }
 
   submit_changes <- function() {
@@ -152,6 +151,7 @@ shinyServer(function(input, output, session) {
     prep_tags <- ifelse(input$in_tags != "",
                         strsplit(input$in_tags, split = "; "),
                         NA)
+
     # observe(print(got_dat()$date))
     result <- docs_update(
       index = "esadocs",
@@ -200,7 +200,12 @@ shinyServer(function(input, output, session) {
       if(input$in_date == "NA") {
         to_add_date <- NA
       } else {
-        to_add_date <- input$in_date
+        isdate <- try(as.Date(input$in_date))
+        if(class(isdate) != "try-error") {
+          to_add_date <- input$in_date
+        } else {
+          stop(paste(input$in_date, "is not a date."))
+        }
       }
       dater <- docs_update(
         index = "esadocs",
@@ -212,41 +217,66 @@ shinyServer(function(input, output, session) {
     return(list(main_res = result$result, date_res = dater))
   }
 
+  validate_data <- function() {
+    if(input$in_date != "") {
+      is_date <- try(as.Date(input$in_date))
+      if(class(is_date) != "try-error") return(TRUE)
+      return(FALSE)
+    }
+    return(TRUE)
+  }
+
   # Submit modal
   observeEvent(input$submit, {
-    showModal(modalDialog(
-      title = HTML("<h3>Submit</h3>"),
-      HTML("<h4>Submit these changes?</h4>"),
-      HTML(
-        paste(
-          c("<div style='font-size:large; padding-left:15px'>",
-            paste("<b>Title</b>:", input$in_title),
-            paste("<b>Date</b>:", input$in_date),
-            paste("<b># pages</b>:", input$in_npages),
-            paste("<b>FR citation</b>:", input$in_frpage),
-            paste("<b>Federal agency</b>:", input$in_fed),
-            paste("<b>Activity code</b>:", input$in_actcode),
-            paste("<b>CH status</b>:", input$in_chstatus),
-            paste("<b>Misc. doc type</b>:", input$in_misc_doctype),
-            paste("<b>Species</b>:", input$in_species),
-            paste("<b>Geo-tags</b>:", input$in_geo),
-            paste("<b>Tags</b>:", input$in_tags),
-            "</div>"
-          ),
-          collapse = "<br>")
-      ),
-      size = "m",
-      footer = tagList(
-        actionButton(
+    if(validate_data()) {
+      showModal(modalDialog(
+        title = HTML("<h3>Submit</h3>"),
+        HTML("<h4>Submit these changes?</h4>"),
+        HTML(
+          paste(
+            c("<div style='font-size:large; padding-left:15px'>",
+              paste("<b>Title</b>:", input$in_title),
+              paste("<b>Date</b>:", input$in_date),
+              paste("<b># pages</b>:", input$in_npages),
+              paste("<b>FR citation</b>:", input$in_frpage),
+              paste("<b>Federal agency</b>:", input$in_fed),
+              paste("<b>Activity code</b>:", input$in_actcode),
+              paste("<b>CH status</b>:", input$in_chstatus),
+              paste("<b>Misc. doc type</b>:", input$in_misc_doctype),
+              paste("<b>Species</b>:", input$in_species),
+              paste("<b>Geo-tags</b>:", input$in_geo),
+              paste("<b>Tags</b>:", input$in_tags),
+              "</div>"
+            ),
+            collapse = "<br>")
+        ),
+        size = "m",
+        footer = tagList(
+          actionButton(
+            "cancel_submit",
+            label = "No",
+            style = "background-color: #F44336; color: white"),
+          actionButton(
+            "real_submit",
+            label = "Yes",
+            style = "background-color: #304FFE; color: white")
+        )
+      ))
+    } else {
+      showModal(modalDialog(
+        title = HTML("<h3>Error!</h3>"),
+        HTML("<p style='font-size:large'>The date is not properly formatted.
+              Please use the international standard: <b>YYYY-MM-DD</b>.</p>"),
+        HTML("<p style='font-size:larger'>For example, July 1st, 2013 would
+             be 2013-07-01.</p>"),
+        size = "m",
+        footer = actionButton(
           "cancel_submit",
-          label = "No",
-          style = "background-color: #F44336; color: white"),
-        actionButton(
-          "real_submit",
-          label = "Yes",
-          style = "background-color: #304FFE; color: white")
-      )
-    ))
+          label = "OK",
+          style = "background-color: #F44336; color: white"
+        )
+      ))
+    }
   })
 
   observeEvent(input$cancel_submit, {
@@ -256,25 +286,32 @@ shinyServer(function(input, output, session) {
   # Submit for real and remove modal
   observeEvent(input$real_submit, {
     changes <- submit_changes()
-    observe(print(changes))
-    updateTextInput(session,
-                    "doc_id",
-                    value = "")
-    updateTextInput(session,
-                    "in_title",
-                    value = "")
-    updateTextInput(session,
-                    "in_date",
-                    value = "")
+    fields <- c("doc_id", "in_title", "in_date", "in_npages",
+                "in_fed", "in_actcode", "in_frpage", "in_chstatus",
+                "in_misc_doctype", "in_species", "in_geo", "in_tags")
+    res <- lapply(fields, updateTextInput, session = session, value = "")
+
     removeModal()
     OKS <- c("noop", "updated")
     if(changes$main_res %in% OKS | is.na(changes$main_res)) {
-      observe(print("OK!"))
+      shinyBS::createAlert(
+        session,
+        anchorId = "success_note",
+        content = paste("Record for", cur_doc(), "updated!"),
+        style = "success",
+        append = FALSE
+      )
+      # observe(print("OK!"))
     } else {
-      obeserve(print("WTF?!"))
+      shinyBS::createAlert(
+        session,
+        anchorId = "success_note",
+        content = paste("Record update for", cur_doc(), "failed!"),
+        style = "error",
+        append = FALSE
+      )
     }
   })
-
 
   # Cancel modal
   observeEvent(input$cancel, {

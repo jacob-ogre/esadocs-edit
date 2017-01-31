@@ -121,6 +121,7 @@ label {
 .shiny-text-output, .shiny-bound-output {
   color: #262626;
   font-size: large;
+  // font-weight: bold;
 }
 
 .warnbadge {
