@@ -35,10 +35,6 @@ shinyServer(function(input, output, session) {
     got_doc()$`_source`
   })
 
-  output$cur_example <- renderText({
-    paste0("Example variable (current: 'current value, may be empty')")
-  })
-
   output$cur_title <- renderText({
     paste0("Title (current: ",
            ifelse(is.null(got_dat()$title),
@@ -105,7 +101,7 @@ shinyServer(function(input, output, session) {
 
   output$cur_species <- renderText({
     res <- paste0("Species (current: ",
-           ifelse(!is.null(got_dat()$species) & got_dat()$species != "",
+           ifelse(!is.null(got_dat()$species),
                   paste(unlist(got_dat()$species),
                         collapse = "; "),
                   "NA"),
@@ -145,14 +141,13 @@ shinyServer(function(input, output, session) {
     prep_species <- ifelse(input$in_species != "",
                           strsplit(input$in_species, split = "; "),
                           NA)
-    prep_geo <- ifelse(input$in_geo != "",
+    prep_geo <- ifelse(!is.na(input$in_geo) & input$in_geo != "",
                        strsplit(input$in_geo, split = "; "),
                        NA)
     prep_tags <- ifelse(input$in_tags != "",
                         strsplit(input$in_tags, split = "; "),
                         NA)
 
-    # observe(print(got_dat()$date))
     result <- docs_update(
       index = "esadocs",
       type = got_dat()$type,
@@ -174,7 +169,7 @@ shinyServer(function(input, output, session) {
           activity_code = ifelse(input$in_actcode != "" |
                                    is.null(got_dat()$activity_code),
                                  input$in_actcode,
-                                 got_dat()$federal_agency),
+                                 got_dat()$activity_code),
           ch_status = ifelse(!is.na(input$in_chstatus) |
                                is.null(got_dat()$ch_status),
                              input$in_chstatus,
@@ -188,7 +183,7 @@ shinyServer(function(input, output, session) {
                            got_dat()$species),
           geo = ifelse(!is.na(prep_geo) | is.null(got_dat()$geo),
                        prep_geo,
-                       c("")),
+                       got_dat()$geo),
           tags = ifelse(!is.na(prep_tags) | is.null(got_dat()$tags),
                         prep_tags,
                         got_dat()$tags)
@@ -283,33 +278,72 @@ shinyServer(function(input, output, session) {
     removeModal()
   })
 
+  log_changes <- function() {
+    origins <- c(got_dat()$title, got_dat()$date, got_dat()$n_pages,
+                 got_dat()$federal_agency, got_dat()$activity_code,
+                 got_dat()$fr_citation_page, got_dat()$ch_status,
+                 got_dat()$doc_type,
+                 paste(unlist(got_dat()$spp_tmp), collapse = "; "),
+                 paste(unlist(got_dat()$geo), collapse = "; "),
+                 paste(unlist(got_dat()$tags), collapse = "; "))
+    changes <- c(input$in_title, input$in_date, input$in_npages,
+                 input$in_fed, input$in_actcode,
+                 input$in_frpage, input$in_chstatus,
+                 input$in_misc_doctype, input$in_species,
+                 input$in_geo, input$in_tags)
+    to_write <- str_c(cur_doc(),
+                      Sys.time(),
+                      str_c(origins, collapse = "\t"),
+                      str_c(changes, collapse = "\t"),
+                      sep = "\t")
+    cmd <- str_c("echo '", to_write, "' >> ",
+                 "/home/jacobmalcom/Data/ESAdocs/changes.tsv",
+                 # "/Users/jacobmalcom/Work/Data/esadocs/changes.tsv",
+                 sep = "")
+    system(cmd, intern = FALSE)
+  }
+
   # Submit for real and remove modal
   observeEvent(input$real_submit, {
-    changes <- submit_changes()
-    fields <- c("doc_id", "in_title", "in_date", "in_npages",
-                "in_fed", "in_actcode", "in_frpage", "in_chstatus",
-                "in_misc_doctype", "in_species", "in_geo", "in_tags")
-    res <- lapply(fields, updateTextInput, session = session, value = "")
+    if(input$key_code == "C7gh34&jdncSKV)8kdnusoHD*@!") {
+      changes <- submit_changes()
+      fields <- c("doc_id", "in_title", "in_date", "in_npages",
+                  "in_fed", "in_actcode", "in_frpage", "in_chstatus",
+                  "in_misc_doctype", "in_species", "in_geo", "in_tags")
+      res <- lapply(fields, updateTextInput, session = session, value = "")
 
-    removeModal()
-    OKS <- c("noop", "updated")
-    if(changes$main_res %in% OKS | is.na(changes$main_res)) {
-      shinyBS::createAlert(
-        session,
-        anchorId = "success_note",
-        content = paste("Record for", cur_doc(), "updated!"),
-        style = "success",
-        append = FALSE
-      )
-      # observe(print("OK!"))
+      removeModal()
+      OKS <- c("noop", "updated")
+      if(changes$main_res %in% OKS | is.na(changes$main_res)) {
+        shinyBS::createAlert(
+          session,
+          anchorId = "success_note",
+          content = paste("Record for", cur_doc(), "updated!"),
+          style = "success",
+          append = FALSE
+        )
+        log_changes()
+      } else {
+        shinyBS::createAlert(
+          session,
+          anchorId = "success_note",
+          content = paste("Record update for", cur_doc(), "failed!"),
+          style = "error",
+          append = FALSE
+        )
+      }
     } else {
-      shinyBS::createAlert(
-        session,
-        anchorId = "success_note",
-        content = paste("Record update for", cur_doc(), "failed!"),
-        style = "error",
-        append = FALSE
-      )
+      showModal(modalDialog(
+        title = HTML("<h3>Key required</h3>"),
+        HTML("<p style='font-size:large'>Enter the current key found in the
+             shared GDrive folder.</p>"),
+        size = "m",
+        footer = actionButton(
+          "cancel_submit",
+          label = "OK",
+          style = "background-color: #F44336; color: white"
+        )
+      ))
     }
   })
 

@@ -153,7 +153,16 @@ body <- dashboardBody(fluidPage(
               placeholder = "new (text, semi-colon sep)"
             )
           ),
-          column(2),
+          column(4,
+            textInput(
+              inputId = "key_code",
+              label = "Current key",
+              width = "110%",
+              value = NA,
+              placeholder = "alpha-numeric"
+            )
+          ),
+          column(10),
           column(1,
             br(), br(),
             actionButton(
@@ -170,24 +179,6 @@ body <- dashboardBody(fluidPage(
               style = "background-color: #304FFE; color: white"
             )
           )
-        # ),
-        # fluidRow(
-        #   br(),
-        #   column(10),
-        #   column(1,
-        #     actionButton(
-        #       "cancel",
-        #       label = "Cancel",
-        #       style = "background-color: #F44336; color: white"
-        #     )
-        #   ),
-        #   column(1,
-        #     actionButton(
-        #       "submit",
-        #       label = "Submit",
-        #       style = "background-color: #304FFE; color: white"
-        #     )
-        #   )
         ),
         fluidRow(
           br(), br()

@@ -9,4 +9,7 @@ library(shinyjs)
 library(shinythemes)
 library(stringr)
 
+system("touch restart.txt", intern = FALSE)
+
 elastic::connect()
+
