@@ -150,7 +150,7 @@ shinyServer(function(input, output, session) {
 
     result <- docs_update(
       index = "esadocs",
-      type = got_dat()$type,
+      type = got_doc()$`_type`,
       id = cur_doc(),
       body = list(
         doc = list(
@@ -204,7 +204,7 @@ shinyServer(function(input, output, session) {
       }
       dater <- docs_update(
         index = "esadocs",
-        type = got_dat()$type,
+        type = got_doc()$`_type`,
         id = cur_doc(),
         body = list( doc = list( date = to_add_date ) )
       )$result
@@ -305,7 +305,7 @@ shinyServer(function(input, output, session) {
 
   # Submit for real and remove modal
   observeEvent(input$real_submit, {
-    if(input$key_code == "C7gh34&jdncSKV)8kdnusoHD*@!") {
+    if(input$key_code == Sys.getenv("ESADOC_KEY")) {
       changes <- submit_changes()
       fields <- c("doc_id", "in_title", "in_date", "in_npages",
                   "in_fed", "in_actcode", "in_frpage", "in_chstatus",

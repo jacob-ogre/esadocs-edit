@@ -10,6 +10,7 @@ library(shinythemes)
 library(stringr)
 
 system("touch restart.txt", intern = FALSE)
+readRenviron("~/.Renviron")
 
 elastic::connect()
 
