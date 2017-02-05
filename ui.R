@@ -15,13 +15,14 @@ body <- dashboardBody(fluidPage(
     tags$head(
       HTML("<link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400'
            rel='stylesheet' type='text/css'>"),
+      HTML('<link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />'),
       tags$style(HTML(readLines("www/custom-style.css")))
     ),
 
     br(),
     fluidRow(
       column(1,
-        tags$a(href="https://esadocs.cci-dev.org",
+        tags$a(href="https://esadocs.cci-dev.org/esadocs-edit/",
                img(src = "ESAdocs_edit.svg",
                    height = "80px")
              )
@@ -192,6 +193,26 @@ body <- dashboardBody(fluidPage(
                      "Help",
                      icon = icon("question-circle"))
       )
+    ),
+    fluidRow(
+      column(1),
+      column(10,
+        div(
+          style = "text-align:center",
+          hr(),
+          HTML('<footer>
+              <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+              <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a>
+              <br />
+              This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span>
+              by <a xmlns:cc="http://creativecommons.org/ns" href="http://defenders.org" property="cc:attributionName" rel="cc:attributionURL">Defenders of Wildlife</a>
+              is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+            </footer>'),
+          hr(),
+          br()
+        )
+      ),
+      column(1)
     )
   )
 ))

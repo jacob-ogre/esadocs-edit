@@ -305,6 +305,8 @@ shinyServer(function(input, output, session) {
 
   # Submit for real and remove modal
   observeEvent(input$real_submit, {
+    observe({print(c("input", input$key_code))})
+    observe({print(Sys.getenv("ESADOC_KEY"))})
     if(input$key_code == Sys.getenv("ESADOC_KEY")) {
       changes <- submit_changes()
       fields <- c("doc_id", "in_title", "in_date", "in_npages",
@@ -332,7 +334,7 @@ shinyServer(function(input, output, session) {
           append = FALSE
         )
       }
-    } else {
+    } else if(input$key_code == "") {
       showModal(modalDialog(
         title = HTML("<h3>Key required</h3>"),
         HTML("<p style='font-size:large'>Enter the current key found in the
