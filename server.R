@@ -305,8 +305,6 @@ shinyServer(function(input, output, session) {
 
   # Submit for real and remove modal
   observeEvent(input$real_submit, {
-    observe({print(c("input", input$key_code))})
-    observe({print(Sys.getenv("ESADOC_KEY"))})
     if(input$key_code == Sys.getenv("ESADOC_KEY")) {
       changes <- submit_changes()
       fields <- c("doc_id", "in_title", "in_date", "in_npages",

@@ -130,7 +130,7 @@ body <- dashboardBody(fluidPage(
               label = textOutput("cur_species"),
               width = "110%",
               value = NA,
-              placeholder = "new (text, semi-colon sep.)"
+              placeholder = "new (text, semicolon sep.)"
             )
           )
         ),
@@ -142,7 +142,7 @@ body <- dashboardBody(fluidPage(
               label = textOutput("cur_geo"),
               width = "110%",
               value = NA,
-              placeholder = "new (text, semi-colon sep.)"
+              placeholder = "new (text, semicolon sep.)"
             )
           ),
           column(4,
@@ -151,7 +151,7 @@ body <- dashboardBody(fluidPage(
               label = textOutput("cur_tags"),
               width = "110%",
               value = NA,
-              placeholder = "new (text, semi-colon sep)"
+              placeholder = "new (text, semicolon sep)"
             )
           ),
           column(4,
