@@ -11,7 +11,7 @@ shinyServer(function(input, output, session) {
   })
 
   got_doc <- reactive({
-    if(nchar(cur_doc()) > 15 & nchar(cur_doc()) < 25) {
+    if(nchar(cur_doc()) > 15 & nchar(cur_doc()) < 35) {
       res <- try(
         docs_get(
           "esadocs",
@@ -138,6 +138,9 @@ shinyServer(function(input, output, session) {
   }
 
   submit_changes <- function() {
+    prep_agency <- ifelse(input$in_fed != "",
+                          strsplit(input$in_fed, split = "; "),
+                          NA)
     prep_species <- ifelse(input$in_species != "",
                           strsplit(input$in_species, split = "; "),
                           NA)
@@ -164,7 +167,7 @@ shinyServer(function(input, output, session) {
                                     got_dat()$fr_citation_page),
           federal_agency = ifelse(input$in_fed != "" |
                                     is.null(got_dat()$federal_agency),
-                                  input$in_fed,
+                                  prep_agency,
                                   got_dat()$federal_agency),
           activity_code = ifelse(input$in_actcode != "" |
                                    is.null(got_dat()$activity_code),
@@ -313,6 +316,7 @@ shinyServer(function(input, output, session) {
       res <- lapply(fields, updateTextInput, session = session, value = "")
 
       removeModal()
+      removeClass(id = "key_code", "attention")
       OKS <- c("noop", "updated")
       if(changes$main_res %in% OKS | is.na(changes$main_res)) {
         shinyBS::createAlert(
@@ -332,7 +336,7 @@ shinyServer(function(input, output, session) {
           append = FALSE
         )
       }
-    } else if(input$key_code == "") {
+    } else {
       showModal(modalDialog(
         title = HTML("<h3>Key required</h3>"),
         HTML("<p style='font-size:large'>Enter the current key found in the
@@ -344,6 +348,7 @@ shinyServer(function(input, output, session) {
           style = "background-color: #F44336; color: white"
         )
       ))
+      addClass(id = "key_code", "attention")
     }
   })
 
@@ -384,10 +389,9 @@ shinyServer(function(input, output, session) {
   # Help modal
   observeEvent(input$help, {
     showModal(modalDialog(
-      title = "Help",
+      title = "Edit ESAdocs data",
       HTML("
         <div class='help_dialog'>
-          <h3>Edit ESAdocs data</h3>
           <hr>
           <h4>Caution: With great power comes great responsibility</h4>
           <span style='font-size:larger'>
@@ -396,14 +400,38 @@ shinyServer(function(input, output, session) {
                an edit is submitted, the elasticsearch database is changed!
                There's no need to worry about this, but be aware.</p>
           <hr>
-          <p>Use <a href='https://esadocs.cci-dev.org' target='_blank'>ESAdocs Search</a>
-            to find documents that need to (or can have) their data updated. Each
-             document will hit will include the `Document ID` at the bottom of
-             the hit. Copy that ID and paste it in the `Document ID` input on
-             this page. The app will find all editable data fields and update
-             the labels to show the current data. Enter any changes in each
-             field's text box. Once done, hit `Submit` to have the changes made
-             to the database.</p>
+          <h4>Get a document ID</h4>
+          <ol>
+            <li>Use <a href='https://esadocs.cci-dev.org' target='_blank'>ESAdocs Search</a>
+            to find documents that need to (or can have) their data updated.</li>
+            <li>Each document will hit will include the `Document ID` at the
+            bottom of the hit. Copy that ID.</li>
+          </ol>
+          <img src='search_and_edit.png' width='100%'>
+          <hr>
+          <h4>Edit the data</h4>
+          <ol>
+            <li> Paste the copied ID string in the `Document ID` input at the
+            top of this page.</li>
+            <li>The app will find all editable data fields and update the labels
+            to show the current data.</li>
+            <li>Enter any changes in each field's text box, such as the activity
+            code for a section 7 consultation.</li>
+            <li>Make sure you enter the current key.</li>
+            <li>Once done, click `Submit` to have the changes made to the database.</li>
+            <ul>
+              <li>You may also cancel the changes; all fields will be cleared.</li>
+            </ul>
+          </ol>
+          <img src='edit_example.png' width='100%'>
+          <hr>
+          <h4>Submit the changes</h4>
+          <ol>
+            <li>Carefully check over the proposed changes.</li>
+            <li>If a field needs more editing, click 'No'.</li>
+            <li>If everything is good, click 'Yes'.</li>
+          </ol>
+          <img src='changes_submit.png' width='50%'>
           </span>
         </div>
       "),
