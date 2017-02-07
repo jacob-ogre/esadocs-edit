@@ -156,14 +156,30 @@ body <- dashboardBody(fluidPage(
           ),
           column(4,
             textInput(
+              inputId = "in_orig_url",
+              label = textOutput("cur_link"),
+              width = "110%",
+              value = NA,
+              placeholder = "new URL (alpha-numeric)"
+            )
+          )
+        ),
+        fluidRow(
+          br(),
+          column(4,
+            textInput(
               inputId = "key_code",
-              label = "Current key",
+              label = "Current key*",
               width = "110%",
               value = NA,
               placeholder = "alpha-numeric"
             )
           ),
-          column(10),
+          column(3,
+            p(style = "font-size:larger; color:#4d4d4d",
+              "* = required field")
+          ),
+          column(3),
           column(1,
             br(), br(),
             actionButton(
@@ -195,22 +211,35 @@ body <- dashboardBody(fluidPage(
       )
     ),
     fluidRow(
+      column(5),
+      column(1,
+             HTML('
+          <a href="http://defenders.org">
+          <img style="vertical-align:middle" src="DOW_logo_small.png" height="60"></a>
+        ')
+      ),
+      column(1,
+             HTML('
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+          <img alt="Creative Commons License" style="border-width:0;padding-top:15px" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a>
+        ')
+      ),
+      column(5)
+    ),
+    fluidRow(
       column(1),
       column(10,
-        div(
-          style = "text-align:center",
-          hr(),
-          HTML('<footer>
-              <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
-              <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a>
-              <br />
-              This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span>
-              by <a xmlns:cc="http://creativecommons.org/ns" href="http://defenders.org" property="cc:attributionName" rel="cc:attributionURL">Defenders of Wildlife</a>
-              is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
-            </footer>'),
-          hr(),
-          br()
-        )
+             div(
+               style = "text-align:center",
+               HTML('<footer>
+            <br />
+            <p>This <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/InteractiveResource" rel="dct:type">work</span>
+            by <a xmlns:cc="http://creativecommons.org/ns" href="http://defenders.org" property="cc:attributionName" rel="cc:attributionURL">Defenders of Wildlife</a>
+            is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.</p>
+            <br />
+          </footer>'),
+               br()
+             )
       ),
       column(1)
     )

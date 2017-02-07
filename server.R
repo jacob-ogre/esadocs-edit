@@ -129,9 +129,19 @@ shinyServer(function(input, output, session) {
     return(unique(res))
   })
 
+  output$cur_link <- renderText({
+    paste0("Original URL (current: ",
+           ifelse(is.null(got_dat()$link),
+                  "NA",
+                  got_dat()$link),
+           ")")
+  })
+
   get_value <- function(inpt, var) {
     if(inpt != "") return(inpt)
-    if(inpt == "" & !is.null(got_dat()[[var]])) return(got_dat()[[var]])
+    if(inpt == "" & !is.null(got_dat()[[var]])) {
+      return(got_dat()[[var]])
+    }
     if(inpt == "" & is.null(got_dat()[[var]])) {
       return("")
     }
@@ -189,7 +199,11 @@ shinyServer(function(input, output, session) {
                        got_dat()$geo),
           tags = ifelse(!is.na(prep_tags) | is.null(got_dat()$tags),
                         prep_tags,
-                        got_dat()$tags)
+                        got_dat()$tags),
+          link = ifelse(input$in_orig_url == "" |
+                          is.null(got_dat()$link),
+                        input$in_orig_url,
+                        got_dat()$link)
         )
       )
     )
