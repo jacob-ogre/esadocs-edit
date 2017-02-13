@@ -3,7 +3,7 @@ hr {
   height: 2px;
 }
 
-hr.style-four {
+.style-four {
   border-top-width: 2px;
   border-top-color: #d9d9d9 !important;
 }
@@ -12,7 +12,7 @@ hr.style-four {
   box-shadow: 2px 2px 2px #d9d9d9;
 }
 
-div.outer {
+.outer {
   background-color: white;
   top: 50px;
   left: 0;

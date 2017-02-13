@@ -238,12 +238,24 @@ shinyServer(function(input, output, session) {
     return(TRUE)
   }
 
+  validate_editor <- function() {
+    if(input$editor == "") {
+      addClass(id = "editor", class = "attention")
+      return(FALSE)
+    }
+    return(TRUE)
+  }
+
   # Submit modal
   observeEvent(input$submit, {
-    if(validate_data()) {
+    if(validate_data() & validate_editor()) {
       showModal(modalDialog(
         title = HTML("<h3>Submit</h3>"),
-        HTML("<h4>Submit these changes?</h4>"),
+        HTML(paste0(
+          "<h4>Submit these changes, ",
+          strsplit(input$editor, split = " ")[[1]][1],
+          "?</h4>")
+        ),
         HTML(
           paste(
             c("<div style='font-size:large; padding-left:15px'>",
@@ -277,10 +289,13 @@ shinyServer(function(input, output, session) {
     } else {
       showModal(modalDialog(
         title = HTML("<h3>Error!</h3>"),
-        HTML("<p style='font-size:large'>The date is not properly formatted.
-              Please use the international standard: <b>YYYY-MM-DD</b>.</p>"),
-        HTML("<p style='font-size:larger'>For example, July 1st, 2013 would
-             be 2013-07-01.</p>"),
+        HTML("<p style='font-size:large'>Either the date is not properly formatted.
+              </p>"),
+        HTML("<p style='font-size:larger'>Please use the international standard:
+             <b>YYYY-MM-DD</b>.For example, July 1st, 2013 would be 2013-07-01.</p>"),
+        HTML("<p style='font-size:large'>OR</p>"),
+        HTML("<p style='font-size:larger'>You didn't include your name. Get
+             credit for your work!</p>"),
         size = "m",
         footer = actionButton(
           "cancel_submit",
@@ -310,14 +325,18 @@ shinyServer(function(input, output, session) {
                  input$in_geo, input$in_tags)
     to_write <- str_c(cur_doc(),
                       Sys.time(),
+                      input$editor,
                       str_c(origins, collapse = "\t"),
                       str_c(changes, collapse = "\t"),
                       sep = "\t")
-    cmd <- str_c("echo '", to_write, "' >> ",
-                 "/home/jacobmalcom/Data/ESAdocs/changes.tsv",
-                 # "/Users/jacobmalcom/Work/Data/esadocs/changes.tsv",
-                 sep = "")
-    system(cmd, intern = FALSE)
+    logf <- "/home/jacobmalcom/Data/ESAdocs/esadocs-editor_log.tsv"
+    if(file.exists(logf)) {
+      cmd <- str_c("echo '", to_write, "' >> ", logf, sep = "")
+    } else {
+      cmd <- str_c("echo '", to_write, "' > ", logf, sep = "")
+    }
+    log_res <- try(system(cmd, intern = FALSE))
+    return(log_res)
   }
 
   # Submit for real and remove modal
@@ -331,6 +350,7 @@ shinyServer(function(input, output, session) {
 
       removeModal()
       removeClass(id = "key_code", "attention")
+      removeClass(id = "editor", "attention")
       OKS <- c("noop", "updated")
       if(changes$main_res %in% OKS | is.na(changes$main_res)) {
         shinyBS::createAlert(
@@ -340,7 +360,7 @@ shinyServer(function(input, output, session) {
           style = "success",
           append = FALSE
         )
-        log_changes()
+        log_res <- log_changes()
       } else {
         shinyBS::createAlert(
           session,
@@ -392,6 +412,8 @@ shinyServer(function(input, output, session) {
     updateTextInput(session,
                     "doc_id",
                     value = "")
+    removeClass(id = "key_code", "attention")
+    removeClass(id = "editor", "attention")
     removeModal()
   })
 

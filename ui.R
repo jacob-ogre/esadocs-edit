@@ -175,13 +175,20 @@ body <- dashboardBody(fluidPage(
               placeholder = "alpha-numeric"
             )
           ),
-          column(3,
+          column(4,
+            textInput(
+              inputId = "editor",
+              label = "Editor name*",
+              width = "110%",
+              value = NA,
+              placeholder = "First Last"
+            )
+          ),
+          column(2,
             p(style = "font-size:larger; color:#4d4d4d",
               "* = required field")
           ),
-          column(3),
           column(1,
-            br(), br(),
             actionButton(
               "cancel",
               label = "Cancel",
@@ -189,7 +196,6 @@ body <- dashboardBody(fluidPage(
             )
           ),
           column(1,
-            br(), br(),
             actionButton(
               "submit",
               label = "Submit",
