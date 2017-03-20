@@ -200,7 +200,7 @@ shinyServer(function(input, output, session) {
           tags = ifelse(!is.na(prep_tags) | is.null(got_dat()$tags),
                         prep_tags,
                         got_dat()$tags),
-          link = ifelse(input$in_orig_url == "" |
+          link = ifelse(input$in_orig_url != "" |
                           is.null(got_dat()$link),
                         input$in_orig_url,
                         got_dat()$link)
@@ -270,6 +270,7 @@ shinyServer(function(input, output, session) {
               paste("<b>Species</b>:", input$in_species),
               paste("<b>Geo-tags</b>:", input$in_geo),
               paste("<b>Tags</b>:", input$in_tags),
+              paste("<b>Original URL</b>:", input$in_orig_url),
               "</div>"
             ),
             collapse = "<br>")
@@ -317,12 +318,13 @@ shinyServer(function(input, output, session) {
                  got_dat()$doc_type,
                  paste(unlist(got_dat()$spp_tmp), collapse = "; "),
                  paste(unlist(got_dat()$geo), collapse = "; "),
-                 paste(unlist(got_dat()$tags), collapse = "; "))
+                 paste(unlist(got_dat()$tags), collapse = "; "),
+                 got_dat()$link)
     changes <- c(input$in_title, input$in_date, input$in_npages,
                  input$in_fed, input$in_actcode,
                  input$in_frpage, input$in_chstatus,
                  input$in_misc_doctype, input$in_species,
-                 input$in_geo, input$in_tags)
+                 input$in_geo, input$in_tags, input$in_orig_url)
     to_write <- str_c(cur_doc(),
                       Sys.time(),
                       input$editor,
@@ -345,7 +347,8 @@ shinyServer(function(input, output, session) {
       changes <- submit_changes()
       fields <- c("doc_id", "in_title", "in_date", "in_npages",
                   "in_fed", "in_actcode", "in_frpage", "in_chstatus",
-                  "in_misc_doctype", "in_species", "in_geo", "in_tags")
+                  "in_misc_doctype", "in_species", "in_geo", "in_tags",
+                  "in_orig_url")
       res <- lapply(fields, updateTextInput, session = session, value = "")
 
       removeModal()
